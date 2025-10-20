@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Buddy - Bookmark Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1e1e1e;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #2d2d30;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: #0078d4;
+            color: white;
+            padding: 1px 20px;
+            text-align: center;
+            border-bottom: 3px solid #106ebe;
+        }
+
+        .buddy-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 15px auto;
+            display: block;
+        }
+
+        .header h1 {
+            margin-bottom: 5px;
+            font-size: 2em;
+        }
+
+        .header p {
+            opacity: 0.8;
+            font-size: 1.1em;
+            margin: 0;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .url-input-section {
+            background: #3c3c3c;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #0078d4;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #5a5a5a;
+            border-radius: 6px;
+            font-size: 16px;
+            background: #1e1e1e;
+            color: #ffffff;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #0078d4;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: #0078d4;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: #106ebe;
+        }
+
+        .btn-secondary {
+            background: #6b6b6b;
+        }
+
+        .btn-secondary:hover {
+            background: #5a5a5a;
+        }
+
+        .current-base {
+            margin-top: 15px;
+            padding: 10px;
+            background: #1e3a1e;
+            border-radius: 6px;
+            border-left: 4px solid #107c10;
+            color: #ffffff;
+        }
+
+        .current-base strong {
+            color: #4caf50;
+        }
+
+        .links-section {
+            margin-top: 20px;
+        }
+
+        .links-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .link-card {
+            background: #3c3c3c;
+            border: 2px solid #5a5a5a;
+            border-radius: 8px;
+            padding: 4px;
+            transition: all 0.3s;
+            position: relative;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .link-card:hover {
+            border-color: #0078d4;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 120, 212, 0.3);
+            background: #4a4a4a;
+        }
+
+        .link-card a {
+            text-decoration: none;
+            color: #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .link-content {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .link-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ffffff;
+            min-width: 200px;
+        }
+
+        .link-url {
+            font-size: 14px;
+            color: #cccccc;
+            font-family: 'Courier New', monospace;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            word-break: break-all;
+            flex: 1;
+        }
+
+        .link-description {
+            font-size: 12px;
+            color: #a0a0a0;
+            font-style: italic;
+            white-space: nowrap;
+        }
+
+        .no-base-url {
+            text-align: center;
+            padding: 40px;
+            color: #a0a0a0;
+            font-style: italic;
+        }
+
+        .management-section {
+            background: #3c3c3c;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            border-left: 4px solid #d13438;
+        }
+
+        .management-section h3 {
+            color: #d13438;
+            margin-bottom: 15px;
+        }
+
+        .url-extension-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .url-extension-form input {
+            flex: 1;
+            min-width: 150px;
+            padding: 10px;
+            border: 2px solid #5a5a5a;
+            border-radius: 6px;
+            background: #1e1e1e;
+            color: #ffffff;
+        }
+
+        .extensions-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #5a5a5a;
+            border-radius: 6px;
+            padding: 10px;
+            background: #1e1e1e;
+            color: #ffffff;
+        }
+
+        .extension-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #5a5a5a;
+            color: #ffffff;
+        }
+
+        .extension-item:last-child {
+            border-bottom: none;
+        }
+
+        .remove-btn {
+            background: #d13438;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .remove-btn:hover {
+            background: #a52a2a;
+        }
+
+        .footer {
+            background: #0078d4;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-size: 14px;
+            border-top: 3px solid #106ebe;
+        }
+
+        /* Login Styles */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1e1e1e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .login-container {
+            background: #2d2d30;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .login-header {
+            margin-bottom: 30px;
+        }
+
+        .login-header h2 {
+            color: #ffffff;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        .login-header p {
+            color: #a0a0a0;
+            font-size: 1em;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .login-input {
+            padding: 15px;
+            border: 2px solid #5a5a5a;
+            border-radius: 8px;
+            font-size: 16px;
+            background: #1e1e1e;
+            color: #ffffff;
+            transition: border-color 0.3s;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: #0078d4;
+        }
+
+        .login-btn {
+            padding: 15px;
+            background: #0078d4;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .login-btn:hover {
+            background: #106ebe;
+        }
+
+        .login-error {
+            color: #d13438;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .login-buddy-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px auto;
+            display: block;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .logout-section {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .logout-btn {
+            background: #d13438;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #a52a2a;
+        }
+
+        @media (max-width: 600px) {
+            .input-group {
+                flex-direction: column;
+            }
+            
+            .url-extension-form {
+                flex-direction: column;
+            }
+            
+            .links-grid {
+                gap: 8px;
+            }
+
+            .link-card a {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .link-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+                width: 100%;
+            }
+
+            .link-title {
+                min-width: auto;
+            }
+
+            .login-container {
+                padding: 30px 20px;
+            }
+
+            .logout-section {
+                position: relative;
+                top: auto;
+                right: auto;
+                text-align: right;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Overlay -->
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-container">
+            <div class="login-buddy-icon"></div>
+            
+            <div class="login-header">
+                <h2>🏋️‍♂️ Welcome to URL Buddy</h2>
+                <p>Please log in to access your bookmark manager</p>
+            </div>
+            
+            <form class="login-form" onsubmit="return handleLogin(event)">
+                <input type="text" id="username" class="login-input" placeholder="Username" required />
+                <input type="password" id="password" class="login-input" placeholder="Password" required />
+                <button type="submit" class="login-btn">Login</button>
+                <div id="loginError" class="login-error">Invalid username or password</div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainApp" class="hidden">
+        <div class="logout-section">
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+        
+        <div class="container">
+        <div class="header">
+            <div class="buddy-icon"></div>
+            <h1>🏋️‍♂️ URL Buddy</h1>
+            <p>Your Portable URL Endpoint Manager</p>
+        </div>
+
+        <div class="content">
+            <!-- Base URL Input Section -->
+            <div class="url-input-section">
+                <h2>Base URL Configuration</h2>
+                <div class="input-group">
+                    <input type="text" id="baseUrlInput" placeholder="Enter base URL (e.g., http://192.168.1.100)" />
+                    <button class="btn" onclick="saveBaseUrl()">Save Base URL</button>
+                    <button class="btn btn-secondary" onclick="clearBaseUrl()">Clear</button>
+                </div>
+                <div id="currentBase" class="current-base" style="display: none;">
+                    <strong>Current Base URL:</strong> <span id="currentBaseUrl"></span>
+                </div>
+            </div>
+
+            <!-- Links Section -->
+            <div class="links-section">
+                <h2>Quick Access Links</h2>
+                <div id="linksContainer">
+                    <div class="no-base-url">
+                        Please enter and save a base URL to see available links.
+                    </div>
+                </div>
+            </div>
+
+            <!-- URL Extensions Management -->
+            <div class="management-section">
+                <h3>Manage URL Extensions</h3>
+                <div class="url-extension-form">
+                    <input type="text" id="extensionPath" placeholder="Extension path (e.g., :5000/devices)" />
+                    <input type="text" id="extensionDescription" placeholder="Description" />
+                    <button class="btn" onclick="addExtension()">Add Extension</button>
+                </div>
+                <div class="extensions-list" id="extensionsList">
+                    <!-- Extensions will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>👥 URL Buddy • Portable & Secure • No external dependencies • Local storage only</p>
+        </div>
+    </div>
+    </div>
+
+    <script>
+        // Authentication variables
+        let authUsername = 'buddy';
+        let authPassword = 'buddybuddy';
+        let bypassAuth = false;
+        
+        // Load authentication settings from auth.txt
+        async function loadAuthSettings() {
+            try {
+                const response = await fetch('auth.txt');
+                const text = await response.text();
+                const lines = text.split('\n');
+                
+                for (let line of lines) {
+                    const [key, value] = line.split('=');
+                    if (key && value) {
+                        if (key.trim() === 'username') {
+                            authUsername = value.trim();
+                        } else if (key.trim() === 'password') {
+                            authPassword = value.trim();
+                        }
+                    }
+                }
+                
+                // Check if both are set to "none" to bypass authentication
+                if (authUsername.toLowerCase() === 'none' && authPassword.toLowerCase() === 'none') {
+                    bypassAuth = true;
+                }
+            } catch (error) {
+                console.log('Could not load auth.txt, using defaults');
+            }
+        }
+        
+        // Check authentication status on page load
+        window.onload = async function() {
+            await loadAuthSettings();
+            checkAuthStatus();
+        };
+
+        function checkAuthStatus() {
+            const isAuthenticated = localStorage.getItem('homeUrlBuddy_authenticated') === 'true';
+            const loginOverlay = document.getElementById('loginOverlay');
+            const mainApp = document.getElementById('mainApp');
+            
+            // If bypass is enabled, skip authentication
+            if (bypassAuth) {
+                loginOverlay.classList.add('hidden');
+                mainApp.classList.remove('hidden');
+                initializeApp();
+                return;
+            }
+            
+            if (isAuthenticated) {
+                loginOverlay.classList.add('hidden');
+                mainApp.classList.remove('hidden');
+                initializeApp();
+            } else {
+                loginOverlay.classList.remove('hidden');
+                mainApp.classList.add('hidden');
+            }
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const loginError = document.getElementById('loginError');
+            
+            if (username === authUsername && password === authPassword) {
+                // Successful login
+                localStorage.setItem('homeUrlBuddy_authenticated', 'true');
+                loginError.style.display = 'none';
+                checkAuthStatus();
+                
+                // Clear form
+                document.getElementById('username').value = '';
+                document.getElementById('password').value = '';
+            } else {
+                // Failed login
+                loginError.style.display = 'block';
+                document.getElementById('password').value = '';
+                document.getElementById('password').focus();
+            }
+            
+            return false;
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('homeUrlBuddy_authenticated');
+                checkAuthStatus();
+            }
+        }
+
+        function initializeApp() {
+            loadBaseUrl();
+            loadExtensions();
+            renderExtensions();
+            renderLinks();
+        }
+
+        // Default URL extensions based on the CSV data
+        let urlExtensions = [
+            { path: ':5000/devices', description: 'Home Landing page' },
+            { path: ':3000/login', description: 'Grafana Login' },
+            { path: ':5000/home/guardian', description: 'Guardian Home' },
+            { path: ':5000/home/discoveryservice', description: 'Discovery Service' },
+            { path: ':8222', description: 'NATS Server Monitoring' },
+            { path: ':9200', description: 'Portainer Management UI' },
+            { path: ':41000', description: 'EasyNmos Dashboard' }
+        ];
+
+        // Load data from localStorage on page load - removed from here since it's now in initializeApp()
+
+        function saveBaseUrl() {
+            const baseUrl = document.getElementById('baseUrlInput').value.trim();
+            if (!baseUrl) {
+                alert('Please enter a base URL');
+                return;
+            }
+
+            // Validate URL format
+            if (!isValidUrl(baseUrl)) {
+                alert('Please enter a valid URL (e.g., http://192.168.1.100 or https://example.com)');
+                return;
+            }
+
+            localStorage.setItem('homeUrlBuddy_baseUrl', baseUrl);
+            loadBaseUrl();
+            renderLinks();
+            document.getElementById('baseUrlInput').value = '';
+        }
+
+        function clearBaseUrl() {
+            localStorage.removeItem('homeUrlBuddy_baseUrl');
+            loadBaseUrl();
+            renderLinks();
+        }
+
+        function loadBaseUrl() {
+            const baseUrl = localStorage.getItem('homeUrlBuddy_baseUrl');
+            const currentBaseDiv = document.getElementById('currentBase');
+            const currentBaseUrlSpan = document.getElementById('currentBaseUrl');
+
+            if (baseUrl) {
+                currentBaseUrlSpan.textContent = baseUrl;
+                currentBaseDiv.style.display = 'block';
+            } else {
+                currentBaseDiv.style.display = 'none';
+            }
+        }
+
+        function isValidUrl(string) {
+            try {
+                new URL(string);
+                return true;
+            } catch (_) {
+                // Try with http:// prefix if no protocol specified
+                try {
+                    new URL('http://' + string);
+                    return true;
+                } catch (_) {
+                    return false;
+                }
+            }
+        }
+
+        function renderLinks() {
+            const container = document.getElementById('linksContainer');
+            const baseUrl = localStorage.getItem('homeUrlBuddy_baseUrl');
+
+            if (!baseUrl) {
+                container.innerHTML = '<div class="no-base-url">Please enter and save a base URL to see available links.</div>';
+                return;
+            }
+
+            // Remove trailing slash from base URL
+            const cleanBaseUrl = baseUrl.replace(/\/$/, '');
+
+            const linksHtml = urlExtensions.map(extension => {
+                const fullUrl = cleanBaseUrl + extension.path;
+                return `
+                    <div class="link-card">
+                        <a href="${fullUrl}" target="_blank">
+                            <div class="link-content">
+                                <div class="link-title">${extension.description}</div>
+                                <div class="link-url">${fullUrl}</div>
+                            </div>
+                            <div class="link-description">Click to open in new tab</div>
+                        </a>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `<div class="links-grid">${linksHtml}</div>`;
+        }
+
+        function addExtension() {
+            const path = document.getElementById('extensionPath').value.trim();
+            const description = document.getElementById('extensionDescription').value.trim();
+
+            if (!path || !description) {
+                alert('Please enter both path and description');
+                return;
+            }
+
+            // Ensure path starts with : or /
+            const normalizedPath = path.startsWith(':') || path.startsWith('/') ? path : '/' + path;
+
+            urlExtensions.push({ path: normalizedPath, description: description });
+            saveExtensions();
+            renderExtensions();
+            renderLinks();
+
+            // Clear form
+            document.getElementById('extensionPath').value = '';
+            document.getElementById('extensionDescription').value = '';
+        }
+
+        function removeExtension(index) {
+            if (confirm('Are you sure you want to remove this extension?')) {
+                urlExtensions.splice(index, 1);
+                saveExtensions();
+                renderExtensions();
+                renderLinks();
+            }
+        }
+
+        function renderExtensions() {
+            const container = document.getElementById('extensionsList');
+            
+            if (urlExtensions.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #7f8c8d; padding: 20px;">No extensions added yet.</div>';
+                return;
+            }
+
+            const extensionsHtml = urlExtensions.map((extension, index) => `
+                <div class="extension-item">
+                    <div>
+                        <strong>${extension.path}</strong> - ${extension.description}
+                    </div>
+                    <button class="remove-btn" onclick="removeExtension(${index})">Remove</button>
+                </div>
+            `).join('');
+
+            container.innerHTML = extensionsHtml;
+        }
+
+        function saveExtensions() {
+            localStorage.setItem('homeUrlBuddy_extensions', JSON.stringify(urlExtensions));
+        }
+
+        function loadExtensions() {
+            const saved = localStorage.getItem('homeUrlBuddy_extensions');
+            if (saved) {
+                try {
+                    urlExtensions = JSON.parse(saved);
+                } catch (e) {
+                    console.error('Error loading extensions from localStorage:', e);
+                    // Keep default extensions if loading fails
+                }
+            }
+        }
+
+        // Export/Import functionality
+        function exportConfig() {
+            const config = {
+                baseUrl: localStorage.getItem('homeUrlBuddy_baseUrl'),
+                extensions: urlExtensions
+            };
+            
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(config, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "homeUrlBuddy_config.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+
+        function importConfig() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const config = JSON.parse(e.target.result);
+                            if (config.baseUrl) {
+                                localStorage.setItem('homeUrlBuddy_baseUrl', config.baseUrl);
+                            }
+                            if (config.extensions && Array.isArray(config.extensions)) {
+                                urlExtensions = config.extensions;
+                                saveExtensions();
+                            }
+                            loadBaseUrl();
+                            renderExtensions();
+                            renderLinks();
+                            alert('Configuration imported successfully!');
+                        } catch (err) {
+                            alert('Error importing configuration: ' + err.message);
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Only add shortcuts if user is authenticated
+            if (localStorage.getItem('homeUrlBuddy_authenticated') === 'true') {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    saveBaseUrl();
+                }
+            }
+        });
+
+        // Add Enter key support for inputs - these will be set up after authentication
+        function setupEventListeners() {
+            document.getElementById('baseUrlInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    saveBaseUrl();
+                }
+            });
+
+            document.getElementById('extensionPath').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('extensionDescription').focus();
+                }
+            });
+
+            document.getElementById('extensionDescription').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addExtension();
+                }
+            });
+        }
+
+        // Set up event listeners after successful login
+        function initializeApp() {
+            loadBaseUrl();
+            loadExtensions();
+            renderExtensions();
+            renderLinks();
+            setupEventListeners();
+        }
+    </script>
+</body>
+</html>

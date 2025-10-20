@@ -1,0 +1,8 @@
+URL, Description
+http://10.187.134.35:5000/devices, Home Landing page
+http://10.187.134.35:3000/login, Grafana Login
+http://10.187.134.35:5000/home/guardian, Guardian Home
+http://10.187.134.35:5000/home/discoveryservice, Discovery Service
+http://10.187.134.35:8222, NATS Server Monitoring
+http://10.187.134.35:9200, Portainer Management UI
+http://10.187.134.34:41000,EasyNmos Dashboard
